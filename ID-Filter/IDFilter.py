@@ -1,3 +1,4 @@
+# TODO(Chenyin): check for corner cases; set up proper check standard
 import time
 import pandas as pd
 import os
@@ -36,12 +37,14 @@ def readfile(path1: str, path2: str) -> pd.DataFrame:
     df11 = df1[df1["组别"] == "同龄人现在"]        # 选择同龄人组
     df11 = df11[["门店名称", "所属区域"]]
     df11.reset_index(drop=True, inplace=True)
+    # TODO(Chenyin): make the assignment below more suitable
     df11.iloc[7]["门店名称"] = "呼市海亮店"         # 若《门店分组表》更新，检查门店名称命名问题
 
     # 区域个数（非重复）和门店个数
     global num_of_region, num_of_store
     num_of_region, num_of_store = len(df11["所属区域"].unique()), len(df11["门店名称"])
 
+    # TODO(Chenyin): 添加维护表信息
     # step 3: df2初步操作
     # 去除元素首尾空格
     df2[["二级部门", "部门", "岗位名称", "入职日期"]] = df2[["二级部门", "部门", "岗位名称", "入职日期"]].\
