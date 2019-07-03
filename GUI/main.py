@@ -23,61 +23,66 @@ def select_path():
 
 
 def hit1():
-    tkinter.messagebox.showinfo(title="⏰", message="(1/2)请选择一个门店分组表")
+    tkinter.messagebox.showinfo(message="(1/2)请选择一个门店分组表")
     file_path1 = select_path()
     if file_path1 == '':  # 取消选择文件时，取消整个动作
-        tkinter.messagebox.showwarning(title="⚠️", message="已取消")
+        tkinter.messagebox.showwarning(message="已取消")
         return
 
-    tkinter.messagebox.showinfo(title="⏰", message="(2/2)请选择一个员工信息表")
+    tkinter.messagebox.showinfo(message="(2/2)请选择一个员工信息表")
     file_path2 = select_path()
     if file_path2 == '':
-        tkinter.messagebox.showwarning(title="⚠️", message="已取消")
+        tkinter.messagebox.showwarning(message="已取消")
         return
 
     current_path = os.getcwd()
     n = os.system("python3 " + current_path + os.sep + "IDFilter_gui.py " +
                   file_path1 + ' ' + file_path2)
     if n == 0:
-        tkinter.messagebox.showinfo(title="✅", message="筛选完成！名单已存至" + current_path)
+        result = tkinter.messagebox.askyesno(message="筛选完成！名单已存至" + current_path + "，是否打开？")
+        if result:
+            os.system("open " + current_path)
     else:
-        tkinter.messagebox.showerror(title="❌", message="筛选失败，请重试！")
+        tkinter.messagebox.showerror(message="筛选失败，请重试！")
 
 
 def hit2():
-    tkinter.messagebox.showinfo(title="⏰", message="(1/3)请选择一个汇总表")
+    tkinter.messagebox.showinfo(message="(1/3)请选择一个汇总表")
     file_path1 = select_path()
     if file_path1 == '':  # 取消选择文件时，取消整个动作
-        tkinter.messagebox.showwarning(title="⚠️", message="已取消")
+        tkinter.messagebox.showwarning(message="已取消")
         return
 
-    tkinter.messagebox.showinfo(title="⏰", message="(2/3)请选择一个员工信息表")
+    tkinter.messagebox.showinfo(message="(2/3)请选择一个员工信息表")
     file_path2 = select_path()
     if file_path2 == '':
-        tkinter.messagebox.showwarning(title="⚠️", message="已取消")
+        tkinter.messagebox.showwarning(message="已取消")
         return
 
-    tkinter.messagebox.showinfo(title="⏰", message="(3/3)请选择一个总数据表")
+    tkinter.messagebox.showinfo(message="(3/3)请选择一个总数据表")
     file_path3 = select_path()
     if file_path2 == '':
-        tkinter.messagebox.showwarning(title="⚠️", message="已取消")
+        tkinter.messagebox.showwarning(message="已取消")
         return
 
     current_path = os.getcwd()
     n = os.system("python3 " + current_path + os.sep + "PeerFilter_gui.py " +
                   file_path1 + ' ' + file_path2 + ' ' + file_path3)
+
     if n == 0:
-        tkinter.messagebox.showinfo(title="✅", message="筛选完成！名单已存至" + current_path)
+        result = tkinter.messagebox.askyesno(message="筛选完成！名单已存至" + current_path + "，是否打开？")
+        if result:
+            os.system("open " + current_path)
     else:
-        tkinter.messagebox.showerror(title="❌", message="筛选失败，请重试！")
+        tkinter.messagebox.showerror(message="筛选失败，请重试！")
 
 
 def hit3():
-    tkinter.messagebox.showwarning(title="⚠️", message="暂未开启")
+    tkinter.messagebox.showwarning(message="暂未开启")
 
 
 def on_closing():
-    if tkinter.messagebox.askokcancel("❓", "确定退出？"):
+    if tkinter.messagebox.askokcancel(message="确定退出？"):
         window.destroy()
 
 
