@@ -44,7 +44,6 @@ def readfile(path1: str, path2: str, path3: str) -> pd.DataFrame:
     global num_of_region, num_of_store
     num_of_region, num_of_store = len(df11["区域"].unique()), len(df11["部门"])
 
-    # TODO(Chenyin): 添加维护表信息
     # step 3a df2初步操作
     df2 = pd.DataFrame(df2, columns=["二级部门", "部门", "员工号", "岗位名称", "姓名", "入职日期"])
     df2.fillna({"二级部门": '-', "部门": '-', "岗位名称": '-', "姓名": '-', "入职日期": '-'}, inplace=True)
