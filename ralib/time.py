@@ -45,6 +45,8 @@ def to_date(date) -> str:
     """
     if date == '-':
         return '-'
+    elif isinstance(date, str):
+        return date
     else:
         return str(date.date())
 

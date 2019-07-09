@@ -1,4 +1,4 @@
-# TODO(Chenyin): check for corner cases; set up proper check standard
+# TODO(Chenyin): check for corner cases; set up proper check standard; variables name
 import time
 import pandas as pd
 import os
