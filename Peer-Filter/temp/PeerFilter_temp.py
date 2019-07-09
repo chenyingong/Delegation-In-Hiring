@@ -69,7 +69,7 @@ def preprocess_files(path1: str, path2: str, path3: str) -> list:
         applymap(ralib.helper.rm_space)
     # 总表中每个员工包含多个observation，可能这个员工从技师变为其他工种，之前的筛选方法就不对了: 应该取反~
     not_in_id = df_database[~df_database["岗位"].isin(["SPA师", "理疗师", "专家"])]["工号"]
-    df_database = df_database[~df_database["岗位"].isin(not_in_id)]
+    df_database = df_database[~df_database["工号"].isin(not_in_id)]
     df_database.reset_index(drop=True, inplace=True)
     # 补全id为空值的信息
 

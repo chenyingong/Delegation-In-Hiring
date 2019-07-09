@@ -99,7 +99,7 @@ def is_senior(date_string: str) -> bool:
     :return: True if the date is belonging to senior group, False otherwise
     """
     if date_string == '-':  # nan has already been converted to '-'
-        return True  # keep the unknown date because of the analysis requirement of the experiment
+        return False  # keep the unknown date because of the analysis requirement of the experiment
     current = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()  # str转date
     today = datetime.date.today()
     if last_day(today, 13) >= current >= datetime.date(2017, 12, 1):
