@@ -72,6 +72,26 @@ def month_delta(start_date: str, end_date: str):
     return -delta if flag is False else delta
 
 
+def same_month(this_date: str, that_date: str) -> bool:
+    """
+    Is this_date on the same month as that_date?
+
+    :param this_date: this date
+    :param that_date: that date
+    :return: true if on the same month, false otherwise 
+    """
+    # convert str obj to date obj
+    this = datetime.datetime.strptime(this_date, '%Y-%m-%d').date()
+    that = datetime.datetime.strptime(that_date, '%Y-%m-%d').date()
+    this_year = this.year
+    that_year = that.year
+    this_month = this.month
+    that_month = that.month
+    if (this_month == that_month) and (this_year == that_year):
+        return True
+    else:
+        return False
+
 def peer_group(date_string: str) -> int:
     """
     Return the peer group the date belonging to.
