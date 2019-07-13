@@ -270,9 +270,11 @@ def senior_to_excel(df_perform: pd.DataFrame, df_database: pd.DataFrame):
         for i in range(len(df_senior_long)):
             id_num = df_senior_long.loc[i, "工号"]
             salary_date = df_senior_long.loc[i, "工资年月"]
-            recent_day = ralib.time.last_day(datetime.date.today(), 2)  # 2nd argument should be 1
+            recent_day = ralib.time.last_day(datetime.date.today(), 1)  # 2nd argument should be 1
             if ralib.time.same_month(salary_date, str(recent_day)):
                 df_senior_long.loc[i, "销售业绩"] = df_senior[df_senior["工号"] == id_num]["销售业绩"].iloc[0]
+                df_senior_long.loc[i, "点号合计"] = df_senior[df_senior["工号"] == id_num]["点号合计"].iloc[0]
+                df_senior_long.loc[i, "部门"] = df_senior[df_senior["工号"] == id_num]["部门"].iloc[0]
 
         # write sheets
         file_path = dir_path + os.sep + r + ".xlsx"

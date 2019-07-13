@@ -43,7 +43,7 @@ def to_date(date) -> str:
     :param date: datetime object
     :return: string representation of the date
     """
-    if date == '-':
+    if date == '-' or isinstance(date, datetime.time):
         return '-'
     elif isinstance(date, str):
         return date
@@ -81,6 +81,8 @@ def same_month(this_date: str, that_date: str) -> bool:
     :return: true if on the same month, false otherwise 
     """
     # convert str obj to date obj
+    if (this_date == '-') or (that_date == '-'):
+        return False
     this = datetime.datetime.strptime(this_date, '%Y-%m-%d').date()
     that = datetime.datetime.strptime(that_date, '%Y-%m-%d').date()
     this_year = this.year
