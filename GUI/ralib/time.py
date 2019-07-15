@@ -96,7 +96,6 @@ def same_month(this_date: str, that_date: str) -> bool:
     else:
         return False
 
-
 def peer_group(date_string: str) -> int:
     """
     Return the peer group the date belonging to.

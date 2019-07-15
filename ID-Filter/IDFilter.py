@@ -1,4 +1,4 @@
-# TODO(Chenyin): check for corner cases; set up proper check standard; variables name
+ # TODO(Chenyin): 于文件头统一变量名
 import time
 import pandas as pd
 import os
@@ -22,16 +22,15 @@ worker_by_group = [{}, {}, {}, {}]  # 用于数据统计
 # 预处理excel文件
 # path1: 《门店分组表》路径
 # path2: 《员工信息表》路径
-def readfile(path1: str, path2: str) -> pd.DataFrame:
+# path3: 《总表》路径--将员工信息表中的“入职日期”更新为总表中这些员工的“最早的入职日期”
+def readfile(path1: str, path2: str, path3: str) -> pd.DataFrame:
     # step 1: excel转换成df
     df1 = pd.read_excel(path1)
     df2 = pd.read_excel(path2)
-
-    # 所有nan值转换为'-'
-    df1.fillna('-', inplace=True)
-    df2.fillna('-', inplace=True)
-
+    df_database = pd.read_excel(path3)
+    
     # step 2: df1初步操作
+    df1.fillna('-', inplace=True)
     df1[["组别", "门店名称", "所属区域"]] = df1[["组别", "门店名称", "所属区域"]].\
         applymap(ralib.helper.rm_space)  # 去除元素首尾空格
     df11 = df1[df1["组别"] == "同龄人现在"]        # 选择同龄人组
@@ -39,40 +38,70 @@ def readfile(path1: str, path2: str) -> pd.DataFrame:
     df11.reset_index(drop=True, inplace=True)
     # TODO(Chenyin): make the assignment below more suitable
     df11.iloc[7]["门店名称"] = "呼市海亮店"         # 若《门店分组表》更新，检查门店名称命名问题
+    df11 = df11.rename(columns={"门店名称": "部门", "所属区域": "区域"})
 
     # 区域个数（非重复）和门店个数
     global num_of_region, num_of_store
-    num_of_region, num_of_store = len(df11["所属区域"].unique()), len(df11["门店名称"])
+    num_of_region, num_of_store = len(df11["区域"].unique()), len(df11["部门"])
 
-    # TODO(Chenyin): 添加维护表信息
-    # step 3: df2初步操作
-    # 去除元素首尾空格
-    df2[["二级部门", "部门", "岗位名称", "入职日期"]] = df2[["二级部门", "部门", "岗位名称", "入职日期"]].\
+    # step 3 df2初步操作
+    df2 = pd.DataFrame(df2, columns=["二级部门", "部门", "员工号", "岗位名称", "姓名", "入职日期"])
+    df2.fillna({"二级部门": '-', "部门": '-', "岗位名称": '-', "姓名": '-', "入职日期": '-'}, inplace=True)
+    df2["入职日期"] = df2["入职日期"].map(ralib.time.to_date)
+    df2[["二级部门", "部门", "岗位名称", "姓名", "入职日期"]] = \
+        df2[["二级部门", "部门", "岗位名称", "姓名", "入职日期"]].applymap(ralib.helper.rm_space)
+    df2 = df2[df2["岗位名称"].isin(["SPA师", "理疗师", "专家"])]
+    df2.reset_index(drop=True, inplace=True)
+    df22 = df2.rename(columns={"二级部门": "区域", "员工号": "工号", "岗位名称": "岗位"})
+
+    # step 4a: df3初步操作
+    # pre-process df_database
+    df_database = pd.DataFrame(df_database, columns=["工号", "姓名", "岗位", "入职日期", "出勤", "点号合计", "销售业绩",
+                                                     "工资年月", "部门", "区域", "最早的入职日期", "最近的入职日期"])
+    df_database.fillna({"姓名": '-', "岗位": '-', "部门": '-', "区域": '-', "入职日期": '-',
+                        "工资年月": '-', "最早的入职日期": '-', "最近的入职日期": '-'}, inplace=True)
+    df_database["入职日期"] = df_database["入职日期"].map(ralib.time.to_date)
+    df_database["工资年月"] = df_database["工资年月"].map(ralib.time.to_date)
+    df_database["最早的入职日期"] = df_database["最早的入职日期"].map(ralib.time.to_date)
+    df_database["最近的入职日期"] = df_database["最近的入职日期"].map(ralib.time.to_date)
+    df_database[["姓名", "岗位", "部门", "区域", "入职日期", "工资年月", "最早的入职日期", "最近的入职日期"]] \
+        = df_database[["姓名", "岗位", "部门", "区域", "入职日期", "工资年月", "最早的入职日期", "最近的入职日期"]].\
         applymap(ralib.helper.rm_space)
-    df22 = df2[df2["岗位名称"].isin(["SPA师", "理疗师", "专家"])]       # 筛选出技师
-    df22 = df22[["二级部门", "部门", "员工号", "岗位名称", "入职日期"]]
-    df22.reset_index(drop=True, inplace=True)
+    # 总表中每个员工包含多个observation，可能这个员工从技师变为其他工种，之前的筛选方法就不对了: 应该取反~
+    not_in_id = df_database[~df_database["岗位"].isin(["SPA师", "理疗师", "专家"])]["工号"]
+    df_database = df_database[~df_database["工号"].isin(not_in_id)]
+    df_database.reset_index(drop=True, inplace=True)
+    # 补全id为空值的信息
 
-    # step 4: df2保留选定门店
-    df22["区域部门"] = df22["二级部门"] + df22["部门"]
-    df11["区域部门"] = df11["所属区域"] + "区域" + df11["门店名称"]
+    # step 4b: update 入职日期
+    id_and = set(df22["工号"]).intersection(set(df_database["工号"]))
+    for i in range(len(df22)):
+        id_num = df22.loc[i, "工号"]
+        if id_num in id_and:
+            s = df_database[df_database["工号"] == id_num]["最早的入职日期"].iloc[0]
+            if (s != '-') and (s is not pd.NaT):
+                df22.loc[i, "入职日期"] = s
+
+    # step 5: df2保留选定门店
+    df22["区域部门"] = df22["区域"] + df22["部门"]
+    df11["区域部门"] = df11["区域"] + "区域" + df11["部门"]
     df222 = df22[df22["区域部门"].isin(df11["区域部门"])]
     df222.reset_index(drop=True, inplace=True)
 
-    # step 5: 插入新变量“群体”
+    # step 6: 插入新变量“群体”
     df222a = df222.copy()            # avoid SettingWithCopyWarning
     df222a["群体"] = df222a["入职日期"].map(ralib.time.peer_group)
     df2222 = df222a[df222a["群体"].isin([1, 2, 3, 4])]
     global num_of_worker, num_of_region2, num_of_store2
     num_of_worker = df2222.shape[0]  # 最终被推送员工总人数
-    num_of_region2 = len(df2222["二级部门"].unique())
+    num_of_region2 = len(df2222["区域"].unique())
     num_of_store2 = len(df2222["部门"].unique())
     return df2222
 
 
-# step 6b: 在当前目录生成文件夹，并生成csv。data_frame必须为df2的最终版
+# step 7: 在当前目录生成文件夹，并生成csv。data_frame必须为df2的最终版
 def write_csv(data_frame: pd.DataFrame):
-    region = data_frame["二级部门"].unique()
+    region = data_frame["区域"].unique()
     group_name = ["0-3组", "4-6组", "7-12组", "12plus"]
     global current_path
     current_path = os.getcwd() + os.sep + "csv-files-" + time.strftime("%Y%m%d%H%M%S")
@@ -84,7 +113,7 @@ def write_csv(data_frame: pd.DataFrame):
         dir_path = ralib.mkfile.convert_path(dir_path)
         ralib.mkfile.mkdir(dir_path)
         for g in range(4):
-            result = data_frame[(data_frame["二级部门"] == r) & (data_frame["群体"] == g+1)][["员工号"]]
+            result = data_frame[(data_frame["区域"] == r) & (data_frame["群体"] == g+1)][["工号"]]
             worker_by_group[g][r] = len(result)
             csv_path = dir_path + os.sep + r + group_name[g] + ".csv"
             csv_path = ralib.mkfile.convert_path(csv_path)
@@ -107,7 +136,7 @@ def statistics():
 
 def main():
     print("开始筛选，请稍等...")
-    df = readfile(sys.argv[1], sys.argv[2])
+    df = readfile(sys.argv[1], sys.argv[2], sys.argv[3])
     write_csv(df)
     statistics()
 
