@@ -4,7 +4,7 @@ import pandas as pd
 from .helper import rm_space
 
 
-def to_existing_excel(df, file_path, sheet_name):
+def to_existing_excel(df: pd.DataFrame, file_path: str, sheet_name: str):
     """
     Write DataFrame to a existing excel file, adding a new sheet not covering old sheets.
 
@@ -13,21 +13,23 @@ def to_existing_excel(df, file_path, sheet_name):
     :param sheet_name: name of the new sheet
     :return:
     """
-    book = load_workbook(file_path)
-    writer = pd.ExcelWriter(file_path, engine='openpyxl')
+    path = rm_space(file_path)
+    sheet = rm_space(sheet_name)
+    book = load_workbook(path)
+    writer = pd.ExcelWriter(path, engine='openpyxl')
     writer.book = book
-    df.to_excel(writer, sheet_name, index=None)
+    df.to_excel(writer, sheet, index=None)
     writer.save()
     writer.close()
 
 
-def mkdir(path: str):
+def mkdir(dir_path: str):
     """
     Make a new directory if it doesn't exist.
 
-    :param path: the path of the directory
+    :param dir_path: the path of the directory
     """
-    path = rm_space(path)
+    path = rm_space(dir_path)
     exists = os.path.exists(path)
     if not exists:
         os.makedirs(path)
@@ -44,4 +46,23 @@ def convert_path(path: str) -> str:
     :param path: path to be converted
     :return: converted path
     """
-    return path.replace(r'\/'.replace(os.sep, ''), os.sep)
+    path1 = rm_space(path)
+    return path1.replace(r'\/'.replace(os.sep, ''), os.sep)
+
+
+def traverse_files(dir_path: str, file_type: str) -> list:
+    """
+    Traverse all files in the directory.
+    :param dir_path: directory path
+    :param file_type: type of files to be traversed
+    :return: list of traversed files
+    """
+    path = rm_space(dir_path)
+    file_type1 = rm_space(file_type)
+    file_list = []
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            file_name = os.path.join(root, name)
+            if file_name.split('.')[-1] == file_type1:
+                file_list.append(file_name)
+    return file_list
