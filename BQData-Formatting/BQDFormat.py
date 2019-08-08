@@ -1,4 +1,4 @@
-# TODO: 小数点没解决；"三五万"、"一万五"省略；添加进度条；变量规整
+# TODO: 小数点没解决；"三五万"、"一万五"省略；添加进度条；变量检查
 import pandas as pd
 import re
 import os
