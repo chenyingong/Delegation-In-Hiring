@@ -1,37 +1,23 @@
-# TODO: 小数点没解决；"三五万"、"一万五"省略；添加进度条；变量检查
-import pandas as pd
+# TODO: 小数点没解决；"三五万"、"一万五"被省略；运行速度过慢
 import re
 import os
 import sys
 import time
+import pandas as pd
 import numpy as np
+from time import sleep
+from tqdm import tqdm
+curPath = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(curPath)[0]
+sys.path.append(rootPath)
 import ralib.mkfile
 
 current_path = ''
-transform_rate = {"文件名": [],
+transform_rate = {
+                  "文件名": [],
                   "转换率": [],
-                  "转换题型": []}
-cn_num = {
-    '〇': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '零': 0,
-    '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9, '貮': 2, '两': 2,
+                  "转换题型": []
 }
-cn_unit = {
-    '十': 10,
-    '拾': 10,
-    '百': 100,
-    '佰': 100,
-    '千': 1000,
-    '仟': 1000,
-    '万': 10000,
-    '萬': 10000,
-    '亿': 100000000,
-    '億': 100000000,
-    '兆': 1000000000000,
-}
-mapping = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
-           '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九']
-p0 = ['', '十', '百', '千']
-s4 = 10 ** 4
 
 
 # Chinese num to arabic num
@@ -41,6 +27,23 @@ def chinese_to_arabic(cn: str) -> int:
     :param cn: string type of chinese number
     :return: int type of arabic number
     """
+    cn_num = {
+        '〇': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '零': 0,
+        '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9, '貮': 2, '两': 2,
+    }
+    cn_unit = {
+        '十': 10,
+        '拾': 10,
+        '百': 100,
+        '佰': 100,
+        '千': 1000,
+        '仟': 1000,
+        '万': 10000,
+        '萬': 10000,
+        '亿': 100000000,
+        '億': 100000000,
+        '兆': 1000000000000,
+    }
     if cn == '':
         return np.nan
 
@@ -102,6 +105,10 @@ def arabic_to_chinese(num: int) -> str:
     :param num: int type of arabic number
     :return: string type of Chinese number
     """
+    mapping = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
+               '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九']
+    p0 = ['', '十', '百', '千']
+    s4 = 10 ** 4
     if num < 0 or num >= s4:
         return ''
     if num < 20:
@@ -423,8 +430,9 @@ def write_to_excel(dir_path: str):
     #
     path = ralib.mkfile.convert_path(dir_path)
     file_list = ralib.mkfile.traverse_files(path, "xlsx")
-    for file_path in file_list:
+    for file_path in tqdm(file_list):
         read_file(file_path)
+        sleep(0.1)
 
 
 def statistics():

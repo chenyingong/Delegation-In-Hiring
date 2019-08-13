@@ -22,6 +22,10 @@ def select_path():
     return tk.filedialog.askopenfilename()
 
 
+def select_dir_path():
+    return tk.filedialog.askdirectory()
+
+
 def hit1():
     tkinter.messagebox.showinfo(message="(1/3)请选择一个门店分组表")
     file_path1 = select_path()
@@ -87,6 +91,24 @@ def hit3():
     tkinter.messagebox.showwarning(message="暂未开启")
 
 
+def hit4():
+    tkinter.messagebox.showinfo(message="(1/1)请选择一个问卷回答文件夹")
+    file_path1 = select_dir_path()
+    if file_path1 == '':  # 取消选择文件时，取消整个动作
+        tkinter.messagebox.showwarning(message="已取消")
+        return
+
+    current_path = os.getcwd()
+    n = os.system("python3 " + current_path + os.sep + "BQDFormat_gui.py " +
+                  file_path1)
+    if n == 0:
+        result = tkinter.messagebox.askyesno(message="筛选完成！名单已存至" + current_path + "，是否打开？")
+        if result:
+            os.system("open " + current_path)
+    else:
+        tkinter.messagebox.showerror(message="筛选失败，请重试！")
+
+
 def on_closing():
     if tkinter.messagebox.askokcancel(message="确定退出？"):
         window.destroy()
@@ -104,7 +126,11 @@ tk.Label(window, text="3. 维护表更新        ", fg='#8B4513', font=('Arial',
 hire_b = tk.Button(window, text="点击开始", width=6, command=hit3)
 hire_b.place(x=280, y=160)
 
+tk.Label(window, text="4. 问卷数据转换       ", fg='#8B4513', font=('Arial', 16)).place(x=130, y=200)
+hire_b = tk.Button(window, text="点击开始", width=6, command=hit4)
+hire_b.place(x=280, y=200)
+
 exit_b = tk.Button(window, text="点击退出", width=6, command=on_closing)
-exit_b.place(x=280, y=200)
+exit_b.place(x=280, y=240)
 
 window.mainloop()
