@@ -151,8 +151,8 @@ def peer_to_excel(df_perform: pd.DataFrame):
             df2_selected.reset_index(drop=True, inplace=True)
             # 理疗师: first 5 workers，SPA师+专家: first 10 workers
             # corner case: not enough, stealing from siblings
-            df1_selected = df1_selected[:5]
-            df2_selected = df2_selected[:10]
+            df1_selected = df1_selected.sort_values(by="随机数", ascending=False)[:5]
+            df2_selected = df2_selected.sort_values(by="随机数", ascending=False)[:10]
             len1 = len(df1_selected)
             len2 = len(df2_selected)
             # difference list
@@ -189,7 +189,7 @@ def peer_to_excel(df_perform: pd.DataFrame):
         if cutoff >= 9:
             df = df[cutoff: cutoff * 2 + 6]  # workers >= 15
         # select first 15 workers
-        df = df[:15]
+        df = df.sort_values(by="随机数", ascending=False)[:15]
         df.reset_index(drop=True, inplace=True)
         # sort by descending random numbers
         df = df.sort_values(by="随机数", ascending=False)
@@ -221,7 +221,7 @@ def senior_to_excel(df_perform: pd.DataFrame, df_database: pd.DataFrame):
         df_by_region.reset_index(drop=True, inplace=True)
         # ??? corner case
         cutoff = len(df_by_region) // 2
-        if cutoff >= 15:
+        if cutoff >= 20:
             df_by_region = df_by_region[:cutoff]
         # group the seniors in DataFrame that stores worker performance
         df_senior_id = df_by_region[df_by_region["入职日期"].map(ralib.time.is_senior)]
@@ -243,10 +243,10 @@ def senior_to_excel(df_perform: pd.DataFrame, df_database: pd.DataFrame):
         unique_id_list = df_senior_long["工号"].unique()
         df_id_rand = pd.DataFrame([unique_id_list, ralib.helper.sample_floats(0, 1, len(unique_id_list))],
                                   index=["工号", "随机数"]).T
-        df_id_15 = df_id_rand.sort_values("随机数", ascending=False)[:15]
-        df_id_15.reset_index(drop=True, inplace=True)
+        df_id_20 = df_id_rand.sort_values("随机数", ascending=False)[:20]
+        df_id_20.reset_index(drop=True, inplace=True)
         # merge to add random float column into df_senior
-        df_senior_long = pd.merge(df_senior_long, df_id_15, on="工号", how="inner")
+        df_senior_long = pd.merge(df_senior_long, df_id_20, on="工号", how="inner")
         # sort "第n月工作" by n from lowest to highest
         df_senior_long = df_senior_long.groupby("随机数").apply(lambda x: x.sort_values("第n月工作"))
         df_senior_long.reset_index(drop=True, inplace=True)
@@ -256,7 +256,7 @@ def senior_to_excel(df_perform: pd.DataFrame, df_database: pd.DataFrame):
 
         # "老人组" sheet
         df_senior = df_senior_id.drop("随机数", axis=1)
-        df_senior = pd.merge(df_senior, df_id_15, on="工号", how="inner")
+        df_senior = pd.merge(df_senior, df_id_20, on="工号", how="inner")
         df_senior.sort_values("随机数", ascending=False, inplace=True)
         df_senior = df_senior.reindex(["工号", "岗位", "姓名", "点号合计", "销售业绩",
                                        "区域", "部门", "入职日期", "随机数"], axis=1)
