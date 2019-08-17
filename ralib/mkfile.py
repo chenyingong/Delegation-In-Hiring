@@ -23,6 +23,21 @@ def to_existing_excel(df: pd.DataFrame, file_path: str, sheet_name: str):
     writer.close()
 
 
+def from_existing_excel(file_path: str, *sheet) -> list:
+    """
+    Read data from existing excel sheets, and transform it to DataFrame object
+    :param file_path: path of the input excel file
+    :param sheet: name of the sheet to read
+    :return: list of DataFrame object
+    """
+    df = []
+    io = pd.io.excel.ExcelFile(file_path)
+    for s in sheet:
+        df.append(pd.read_excel(io, sheet_name=s))
+    io.close()
+    return df
+
+
 def mkdir(dir_path: str):
     """
     Make a new directory if it doesn't exist.

@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 
 def rm_space(s: str) -> str:
@@ -29,6 +30,26 @@ def sample_floats(low: int, high: int, k=1) -> list:
         x = random.uniform(low, high)
         while x in seen:
             x = random.uniform(low, high)
+        seen.add(x)
+        result.append(x)
+    return result
+
+
+def sample_int(low: int, high: int, k=1) -> list:
+    """
+    Return a k-length list of unique random ints in the range of low <= x <= high.
+
+    :param low: lower bound of the range
+    :param high: higher bound of the range
+    :param k: the number of the random ints
+    :return:
+    """
+    result = []
+    seen = set()
+    for i in range(k):
+        x = np.random.randint(low, high)
+        while x in seen:
+            x = np.random.randint(low, high)
         seen.add(x)
         result.append(x)
     return result
