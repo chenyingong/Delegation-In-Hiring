@@ -1,4 +1,4 @@
-# TODO(Chenyin): 于文件头统一变量名；判断rehire员工；
+# TODO(Chenyin): 需要继续优化
 import pandas as pd
 import datetime
 import time
